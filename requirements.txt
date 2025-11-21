@@ -1,0 +1,7 @@
+cffi==2.0.0
+pocketsphinx==5.0.4
+PyAudio==0.2.14
+pycparser==2.23
+sounddevice==0.5.3
+SpeechRecognition==3.14.4
+typing_extensions==4.15.0
