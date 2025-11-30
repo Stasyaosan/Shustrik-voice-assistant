@@ -9,29 +9,11 @@ from num2words import num2words
 audio_silero = Silero()
 
 
-def tts_process_main(q: multiprocessing.Queue):
-    while True:
-        text = q.get()
-        if text is None:
-            break
-
-        try:
-            audio_silero.silero_tts_basic(text)
-            # speaker.Speak(text)
-
-        except Exception as e:
-            print(f"[TTS-process] Ошибка синтеза: {e}")
-
-
 class Voice:
     def __init__(self):
         self.recognizer = sr.Recognizer()
         self.microphone = sr.Microphone()
         self.is_listening = False
-
-        self.tts_queue = multiprocessing.Queue()
-        self.tts_process = multiprocessing.Process(target=tts_process_main, args=(self.tts_queue,))
-        self.tts_process.start()
 
         self.listening_thread = None
 
@@ -39,15 +21,11 @@ class Voice:
 
     def speak(self, text):
         print(f"[speak] {text}")
-        self.tts_queue.put(text)
+        audio_silero.silero_tts_basic(text)
 
     def stop(self):
         print("[stop] Остановка...")
         self.is_listening = False
-        self.tts_queue.put(None)
-        if self.tts_process.is_alive():
-            self.tts_process.join(timeout=3)
-        print("[stop] TTS остановлен")
 
     def calibrate_microphone(self):
         print("Калибровка микрофона...")
@@ -83,6 +61,8 @@ class Voice:
 
     def process_command(self, command):
         if not command:
+            return
+        if not command.startswith('шустрик'):
             return
 
         print(f"Команда: {command}")
@@ -126,6 +106,8 @@ class Voice:
         self.listening_thread.daemon = True
         self.listening_thread.start()
         print("Прослушивание запущено")
+
+
 
 
 if __name__ == "__main__":
