@@ -1,12 +1,13 @@
 import time
 import speech_recognition as sr
 import threading
-import multiprocessing
 from datetime import datetime
 from siler_audio import Silero
 from num2words import num2words
+from Query_recognition import Query
 
 audio_silero = Silero()
+qr = Query()
 
 
 class Voice:
@@ -69,9 +70,9 @@ class Voice:
 
         command_lower = command.lower()
 
-        if "привет" in command_lower:
+        if qr.get_intent(command) == 'greeting':
             self.speak("Привет! Рад вас слышать!")
-        elif "время" in command_lower:
+        elif qr.get_intent(command) == 'time':
 
             h = datetime.now().strftime("%H")
             m = datetime.now().strftime("%M")
@@ -80,7 +81,7 @@ class Voice:
             self.speak(f"Сейчас {a_h} {a_m}")
         elif "как дела" in command_lower:
             self.speak("Всё отлично! Готов!")
-        elif "пока" in command_lower or "стоп" in command_lower or "остановись" in command_lower:
+        elif qr.get_intent(command) == 'farewell':
             self.speak("До свидания! Выключаюсь.")
             self.is_listening = False
         else:
@@ -106,8 +107,6 @@ class Voice:
         self.listening_thread.daemon = True
         self.listening_thread.start()
         print("Прослушивание запущено")
-
-
 
 
 if __name__ == "__main__":
