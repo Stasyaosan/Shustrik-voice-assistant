@@ -5,6 +5,8 @@ from datetime import datetime
 from siler_audio import Silero
 from num2words import num2words
 from Query_recognition import Query
+from pyowm import OWM
+from config import API_KEY
 
 audio_silero = Silero()
 qr = Query()
@@ -84,8 +86,16 @@ class Voice:
         elif qr.get_intent(command) == 'farewell':
             self.speak("До свидания! Выключаюсь.")
             self.is_listening = False
+        elif qr.get_intent(command) == 'weather':
+            own = OWM(API_KEY)
+            mgr = own.weather_manager()
+
+            obs = mgr.weather_at_place('Москва,RU')
+            weather = obs.weather
+            res = f'Температура: {num2words(round(weather.temperature('celsius')['temp']), lang='ru')} градусов, Влажность: {num2words(round(weather.humidity), lang='ru')} процентов'
+            self.speak(f"Сейчас {res}")
         else:
-            self.speak("Пока не понимаю эту команду. Попробуйте сказать 'привет', 'время' или 'пока'")
+            self.speak("Пока не понимаю эту команду.")
 
     def listening_loop(self):
         print("Цикл прослушивания запущен")

@@ -1,26 +1,16 @@
+import json
+
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import LinearSVC
 
 
 class Query:
-    config = {
-        "intents": {
-            "greeting": {
-                "examples": ["привет", "здравствуй", "добрый день",]
-            },
-            "farewell": {
-                "examples": ["пока", "до свидания", "увидимся", "до встречи"]
-            },
-            "time": {
-                "examples": ["время", "сколько времени", "сколько показывают часы",
-                             "goodbye", "bye", "see you soon"],
-            },
-
-        },
-    }
 
     def __init__(self):
+        with open('config.json', 'r', encoding='utf-8') as f:
+            Query.config = json.load(f)
+
         self.vectorizer = TfidfVectorizer(analyzer="char", ngram_range=(2, 3))
         self.classifier_probability = LogisticRegression()
         self.classifier = LinearSVC()
