@@ -6,10 +6,14 @@ from siler_audio import Silero
 from num2words import num2words
 from Query_recognition import Query
 from pyowm import OWM
-from config import API_KEY
+from dotenv import load_dotenv
+import os
+from search_google import Search_google
 
 audio_silero = Silero()
 qr = Query()
+
+load_dotenv()
 
 
 class Voice:
@@ -21,6 +25,7 @@ class Voice:
         self.listening_thread = None
 
         self.calibrate_microphone()
+        self.google = Search_google()
 
     def speak(self, text):
         print(f"[speak] {text}")
@@ -70,30 +75,40 @@ class Voice:
 
         print(f"Команда: {command}")
 
-        command_lower = command.lower()
+        command = command.replace('шустрик', '')
 
         if qr.get_intent(command) == 'greeting':
             self.speak("Привет! Рад вас слышать!")
-        elif qr.get_intent(command) == 'time':
+        elif qr.get_intent(command) == "google_search":
+            ss = self.google.search(command)
+            sss = []
+            for i, res in enumerate(ss, 1):
+                if res.get('description') == '':
+                    continue
+                sss.append({
+                    'title': res.get('title', 'Без заголовка'),
+                    'link': res.get('url', ''),
+                    'description': res.get('description', '')
+                })
+            print(sss)
 
+        elif qr.get_intent(command) == 'time':
             h = datetime.now().strftime("%H")
             m = datetime.now().strftime("%M")
             a_h = num2words(h, lang='ru')
             a_m = num2words(m, lang='ru')
             self.speak(f"Сейчас {a_h} {a_m}")
-        elif "как дела" in command_lower:
-            self.speak("Всё отлично! Готов!")
+        elif qr.get_intent(command) == 'weather':
+            own = OWM(os.getenv('API_KEY_WEATHER'))
+            mgr = own.weather_manager()
+            obs = mgr.weather_at_place('Москва,RU')
+            weather = obs.weather
+            res = f'Температура: {num2words(round(weather.temperature('celsius')['temp']), lang='ru')} градусов. Влажность: {num2words(round(weather.humidity), lang='ru')}%'
+            self.speak(f"Сейчас {res}")
         elif qr.get_intent(command) == 'farewell':
             self.speak("До свидания! Выключаюсь.")
             self.is_listening = False
-        elif qr.get_intent(command) == 'weather':
-            own = OWM(API_KEY)
-            mgr = own.weather_manager()
 
-            obs = mgr.weather_at_place('Москва,RU')
-            weather = obs.weather
-            res = f'Температура: {num2words(round(weather.temperature('celsius')['temp']), lang='ru')} градусов, Влажность: {num2words(round(weather.humidity), lang='ru')} процентов'
-            self.speak(f"Сейчас {res}")
         else:
             self.speak("Пока не понимаю эту команду.")
 
