@@ -21,7 +21,7 @@ class Query:
         index_of_best_intent = list(self.classifier_probability.classes_).index(best_intent)
         probabilities = self.classifier_probability.predict_proba(self.vectorizer.transform([request]))[0]
         best_intent_probability = probabilities[index_of_best_intent]
-        if best_intent_probability > 0.157:
+        if best_intent_probability > 0.40:
             return best_intent
 
     def prepare_corpus(self):

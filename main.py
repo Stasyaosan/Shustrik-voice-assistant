@@ -80,6 +80,13 @@ class Voice:
         if qr.get_intent(command) == 'greeting':
             self.speak("Привет! Рад вас слышать!")
         elif qr.get_intent(command) == "google_search":
+            command_worlds = command.split(" ")
+            for i in range(len(command_worlds)):
+                if qr.get_intent(command_worlds[i]) == 'google_search':
+                    command = command.replace(command_worlds[i], '')
+            command = command.strip()
+            print(command)
+
             ss = self.google.search(command)
             sss = []
             for i, res in enumerate(ss, 1):
