@@ -85,6 +85,8 @@ class Voice:
                 if qr.get_intent(command_worlds[i]) == 'google_search':
                     command = command.replace(command_worlds[i], '')
             command = command.strip()
+            if command.startswith('в '):
+                command = command[2:]
             print(command)
 
             ss = self.google.search(command)
