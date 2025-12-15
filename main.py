@@ -51,7 +51,7 @@ class Voice:
             with self.microphone as source:
                 print("Слушаю...")
                 # Увеличиваем timeout и phrase_time_limit для лучшего распознавания
-                audio = self.recognizer.listen(source, timeout=10, phrase_time_limit=8)
+                audio = self.recognizer.listen(source, timeout=10, phrase_time_limit=15)
 
             print("Распознаю речь...")
             text = self.recognizer.recognize_google(audio, language='ru-RU')
@@ -91,6 +91,7 @@ class Voice:
 
             ss = self.google.search(command)
             sss = []
+            ss_d = ''
             for i, res in enumerate(ss, 1):
                 if res.get('description') == '':
                     continue
@@ -99,7 +100,12 @@ class Voice:
                     'link': res.get('url', ''),
                     'description': res.get('description', '')
                 })
+                ss_d += res.get('title', 'Без заголовка') + '. '
+            ress = f'Найдено {num2words(len(sss), lang='ru')} страниц'
             print(sss)
+            ress += ss_d
+
+            self.speak(ress)
 
         elif qr.get_intent(command) == 'time':
             h = datetime.now().strftime("%H")
