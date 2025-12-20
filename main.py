@@ -22,7 +22,7 @@ class Voice:
         self.microphone = sr.Microphone()
         self.is_listening = False
 
-        self.listening_thread = None
+        # self.listening_thread = None
 
         self.calibrate_microphone()
         self.google = Search_google()
@@ -51,7 +51,7 @@ class Voice:
             with self.microphone as source:
                 print("Слушаю...")
                 # Увеличиваем timeout и phrase_time_limit для лучшего распознавания
-                audio = self.recognizer.listen(source, timeout=10, phrase_time_limit=15)
+                audio = self.recognizer.listen(source, timeout=20, phrase_time_limit=20)
 
             print("Распознаю речь...")
             text = self.recognizer.recognize_google(audio, language='ru-RU')
@@ -121,7 +121,7 @@ class Voice:
             res = f'Температура: {num2words(round(weather.temperature('celsius')['temp']), lang='ru')} градусов. Влажность: {num2words(round(weather.humidity), lang='ru')}%'
             self.speak(f"Сейчас {res}")
         elif qr.get_intent(command) == 'farewell':
-            self.speak("До свидания! Выключаюсь.")
+            self.speak("До свидания! Я заснул.")
             self.is_listening = False
 
         else:
@@ -131,11 +131,18 @@ class Voice:
         print("Цикл прослушивания запущен")
         self.speak("Ассистент запущен. Говорите команды")
 
-        while self.is_listening:
-            command = self.listen()
-            if command and command.strip():
-                self.process_command(command)
-            time.sleep(0.5)
+        while True:
+            if self.is_listening:
+                command = self.listen()
+                if command and command.strip():
+                    self.process_command(command)
+                time.sleep(0.5)
+            else:
+                command = self.listen()
+                if command and command.strip():
+                    if command.lower() == 'шустрик проснись':
+                        self.is_listening = True
+                        self.speak('Я проснулся')
 
     def start_listening(self):
         if self.is_listening:
@@ -143,9 +150,10 @@ class Voice:
             return
 
         self.is_listening = True
-        self.listening_thread = threading.Thread(target=self.listening_loop)
-        self.listening_thread.daemon = True
-        self.listening_thread.start()
+        self.listening_loop()
+        # self.listening_thread = threading.Thread(target=self.listening_loop)
+        # self.listening_thread.daemon = True
+        # self.listening_thread.start()
         print("Прослушивание запущено")
 
 
