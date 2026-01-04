@@ -9,7 +9,9 @@ from pyowm import OWM
 from dotenv import load_dotenv
 import os
 from search_google import Search_google
+from scan_disk import ProgramSearcher
 
+prog_search = ProgramSearcher()
 audio_silero = Silero()
 qr = Query()
 
@@ -70,8 +72,14 @@ class Voice:
     def process_command(self, command):
         if not command:
             return
+
+        index = command.find('шустрик')
+        if index != -1:
+            command = command[index:]
+
         if not command.startswith('шустрик'):
             return
+
 
         print(f"Команда: {command}")
 
@@ -139,7 +147,9 @@ class Voice:
                 time.sleep(0.5)
             else:
                 command = self.listen()
-                if command and command.strip():
+                index = command.find('шустрик')
+                if index != -1:
+                    command = command[index:]
                     if command.lower() == 'шустрик проснись':
                         self.is_listening = True
                         self.speak('Я проснулся')
