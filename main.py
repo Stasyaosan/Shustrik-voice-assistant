@@ -9,9 +9,8 @@ from pyowm import OWM
 from dotenv import load_dotenv
 import os
 from search_google import Search_google
-from scan_disk import ProgramSearcher
+from open_program import ProgramSearcher
 
-prog_search = ProgramSearcher()
 audio_silero = Silero()
 qr = Query()
 
@@ -28,6 +27,7 @@ class Voice:
 
         self.calibrate_microphone()
         self.google = Search_google()
+        self.ps = ProgramSearcher()
 
     def speak(self, text):
         print(f"[speak] {text}")
@@ -83,10 +83,11 @@ class Voice:
 
         print(f"Команда: {command}")
 
-        command = command.replace('шустрик', '')
+        command = command.replace('шустрик', '').strip()
 
         if qr.get_intent(command) == 'greeting':
             self.speak("Привет! Рад вас слышать!")
+
         elif qr.get_intent(command) == "google_search":
             command_worlds = command.split(" ")
             for i in range(len(command_worlds)):
@@ -121,6 +122,7 @@ class Voice:
             a_h = num2words(h, lang='ru')
             a_m = num2words(m, lang='ru')
             self.speak(f"Сейчас {a_h} {a_m}")
+
         elif qr.get_intent(command) == 'weather':
             own = OWM(os.getenv('API_KEY_WEATHER'))
             mgr = own.weather_manager()
@@ -128,9 +130,13 @@ class Voice:
             weather = obs.weather
             res = f'Температура: {num2words(round(weather.temperature('celsius')['temp']), lang='ru')} градусов. Влажность: {num2words(round(weather.humidity), lang='ru')}%'
             self.speak(f"Сейчас {res}")
+
         elif qr.get_intent(command) == 'farewell':
             self.speak("До свидания! Я заснул.")
             self.is_listening = False
+
+        elif qr.get_intent(command) == 'open_program':
+            print('open')
 
         else:
             self.speak("Пока не понимаю эту команду.")
