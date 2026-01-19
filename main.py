@@ -1,3 +1,4 @@
+import json
 import time
 import speech_recognition as sr
 import threading
@@ -23,11 +24,12 @@ class Voice:
         self.microphone = sr.Microphone()
         self.is_listening = False
 
-        # self.listening_thread = None
-
-        self.calibrate_microphone()
         self.google = Search_google()
         self.ps = ProgramSearcher()
+        with open('config.json', 'r', encoding='utf-8') as f:
+            self.intents_keys = json.load(f)['intents'].keys()
+
+        self.calibrate_microphone()
 
     def speak(self, text):
         print(f"[speak] {text}")
@@ -69,6 +71,14 @@ class Voice:
             print(f"Ошибка слушания: {e}")
             return ""
 
+    def delete_commands(self, command, indent):
+        command_worlds = command.split(" ")
+        for i in range(len(command_worlds)):
+            if qr.get_intent(command_worlds[i]) == indent:
+                command = command.replace(command_worlds[i], '')
+        command = command.strip()
+        return command
+
     def process_command(self, command):
         if not command:
             return
@@ -80,23 +90,24 @@ class Voice:
         if not command.startswith('шустрик'):
             return
 
-
         print(f"Команда: {command}")
 
         command = command.replace('шустрик', '').strip()
+
+        args = command
+        for intent in self.intents_keys:
+            args = self.delete_commands(command, intent)
+
+        set1 = set(command.split())
+        set2 = set(args.split())
+        set3 = set1 - set2
+
+        command = ' '.join(list(set3))
 
         if qr.get_intent(command) == 'greeting':
             self.speak("Привет! Рад вас слышать!")
 
         elif qr.get_intent(command) == "google_search":
-            command_worlds = command.split(" ")
-            for i in range(len(command_worlds)):
-                if qr.get_intent(command_worlds[i]) == 'google_search':
-                    command = command.replace(command_worlds[i], '')
-            command = command.strip()
-            if command.startswith('в '):
-                command = command[2:]
-            print(command)
 
             ss = self.google.search(command)
             sss = []
@@ -136,7 +147,7 @@ class Voice:
             self.is_listening = False
 
         elif qr.get_intent(command) == 'open_program':
-            print('open')
+            self.speak(self.ps.search_s(args))
 
         else:
             self.speak("Пока не понимаю эту команду.")
