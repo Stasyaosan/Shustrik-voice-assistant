@@ -9,8 +9,8 @@ from Query_recognition import Query
 from pyowm import OWM
 from dotenv import load_dotenv
 import os
-from search_google import Search_google
 from open_program import ProgramSearcher
+from wikipedia_api import Wiki
 
 audio_silero = Silero()
 qr = Query()
@@ -23,9 +23,8 @@ class Voice:
         self.recognizer = sr.Recognizer()
         self.microphone = sr.Microphone()
         self.is_listening = False
-
-        self.google = Search_google()
         self.ps = ProgramSearcher()
+        self.wiki = Wiki()
         with open('config.json', 'r', encoding='utf-8') as f:
             self.intents_keys = json.load(f)['intents'].keys()
 
@@ -107,25 +106,9 @@ class Voice:
         if qr.get_intent(command) == 'greeting':
             self.speak("Привет! Рад вас слышать!")
 
-        elif qr.get_intent(command) == "google_search":
-
-            ss = self.google.search(command)
-            sss = []
-            ss_d = ''
-            for i, res in enumerate(ss, 1):
-                if res.get('description') == '':
-                    continue
-                sss.append({
-                    'title': res.get('title', 'Без заголовка'),
-                    'link': res.get('url', ''),
-                    'description': res.get('description', '')
-                })
-                ss_d += res.get('title', 'Без заголовка') + '. '
-            ress = f'Найдено {num2words(len(sss), lang='ru')} страниц'
-            print(sss)
-            ress += ss_d
-
-            self.speak(ress)
+        elif qr.get_intent(command) == 'wikipedia_search':
+            self.speak(self.wiki.search(args)['title'])
+            self.speak(self.wiki.search(args)['content'])
 
         elif qr.get_intent(command) == 'time':
             h = datetime.now().strftime("%H")
@@ -178,9 +161,6 @@ class Voice:
 
         self.is_listening = True
         self.listening_loop()
-        # self.listening_thread = threading.Thread(target=self.listening_loop)
-        # self.listening_thread.daemon = True
-        # self.listening_thread.start()
         print("Прослушивание запущено")
 
 
