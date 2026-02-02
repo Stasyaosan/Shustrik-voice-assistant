@@ -16,12 +16,12 @@ class Query:
         self.classifier = LinearSVC()
         self.prepare_corpus()
 
-    def get_intent(self, request):
+    def get_intent(self, request, k=0.4):
         best_intent = self.classifier.predict(self.vectorizer.transform([request]))[0]
         index_of_best_intent = list(self.classifier_probability.classes_).index(best_intent)
         probabilities = self.classifier_probability.predict_proba(self.vectorizer.transform([request]))[0]
         best_intent_probability = probabilities[index_of_best_intent]
-        if best_intent_probability > 0.23:
+        if best_intent_probability > k:
             return best_intent
 
     def prepare_corpus(self):

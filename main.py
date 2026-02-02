@@ -97,18 +97,11 @@ class Voice:
         for intent in self.intents_keys:
             args = self.delete_commands(command, intent)
 
-        set1 = set(command.split())
-        set2 = set(args.split())
-        set3 = set1 - set2
-
-        command = ' '.join(list(set3))
+        print(command)
 
         if qr.get_intent(command) == 'greeting':
             self.speak("Привет! Рад вас слышать!")
 
-        elif qr.get_intent(command) == 'wikipedia_search':
-            self.speak(self.wiki.search(args)['title'])
-            self.speak(self.wiki.search(args)['content'])
 
         elif qr.get_intent(command) == 'time':
             h = datetime.now().strftime("%H")
@@ -116,6 +109,28 @@ class Voice:
             a_h = num2words(h, lang='ru')
             a_m = num2words(m, lang='ru')
             self.speak(f"Сейчас {a_h} {a_m}")
+
+        elif qr.get_intent(command) == 'schedule_by_day':
+
+            day_of_week = os.listdir('schedule')
+            name_file = None
+            for j in command.split():
+                j = j.lower()
+                for i in day_of_week:
+                    q = i.replace('.json', '').lower()
+                    if j == q:
+                        name_file = i
+                        break
+
+            if name_file:
+                with open(f'schedule/{name_file}') as f:
+                    r = json.load(f)
+
+                for time, data in r[0].items():
+                    time = time.split(':')
+                    self.speak(f'Расписание на время {num2words(time[0], lang='ru')} {num2words(time[1], lang='ru')}')
+            else:
+                self.speak('Укажите день недели')
 
         elif qr.get_intent(command) == 'weather':
             own = OWM(os.getenv('API_KEY_WEATHER'))
@@ -132,12 +147,16 @@ class Voice:
         elif qr.get_intent(command) == 'open_program':
             self.speak(self.ps.search_s(args))
 
+        elif qr.get_intent(command) == 'wikipedia_search':
+            self.speak(self.wiki.search(args)['title'])
+            self.speak(self.wiki.search(args)['content'])
+
         else:
             self.speak("Пока не понимаю эту команду.")
 
     def listening_loop(self):
         print("Цикл прослушивания запущен")
-        self.speak("Ассистент запущен. Говорите команды")
+        # self.speak("Ассистент запущен. Говорите команды")
 
         while True:
             if self.is_listening:
