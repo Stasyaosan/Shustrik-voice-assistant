@@ -1,7 +1,6 @@
 import json
 import time
 import speech_recognition as sr
-import threading
 from datetime import datetime
 from siler_audio import Silero
 from num2words import num2words
@@ -11,6 +10,8 @@ from dotenv import load_dotenv
 import os
 from open_program import ProgramSearcher
 from wikipedia_api import Wiki
+from commands.schedule_by_day import schedule_by_day
+import threading
 
 audio_silero = Silero()
 qr = Query()
@@ -33,6 +34,8 @@ class Voice:
     def speak(self, text):
         print(f"[speak] {text}")
         audio_silero.silero_tts_basic(text)
+        # thread = threading.Thread(target=audio_silero.silero_tts_basic, args=(text,))
+        # thread.start()
 
     def stop(self):
         print("[stop] Остановка...")
@@ -82,26 +85,23 @@ class Voice:
         if not command:
             return
 
-        index = command.find('шустрик')
+        index = command.find('барсик')
         if index != -1:
             command = command[index:]
 
-        if not command.startswith('шустрик'):
+        if not command.startswith('барсик'):
             return
 
         print(f"Команда: {command}")
 
-        command = command.replace('шустрик', '').strip()
+        command = command.replace('барсик', '').strip()
 
         args = command
         for intent in self.intents_keys:
             args = self.delete_commands(command, intent)
 
-        print(command)
-
         if qr.get_intent(command) == 'greeting':
             self.speak("Привет! Рад вас слышать!")
-
 
         elif qr.get_intent(command) == 'time':
             h = datetime.now().strftime("%H")
@@ -111,26 +111,7 @@ class Voice:
             self.speak(f"Сейчас {a_h} {a_m}")
 
         elif qr.get_intent(command) == 'schedule_by_day':
-
-            day_of_week = os.listdir('schedule')
-            name_file = None
-            for j in command.split():
-                j = j.lower()
-                for i in day_of_week:
-                    q = i.replace('.json', '').lower()
-                    if j == q:
-                        name_file = i
-                        break
-
-            if name_file:
-                with open(f'schedule/{name_file}') as f:
-                    r = json.load(f)
-
-                for time, data in r[0].items():
-                    time = time.split(':')
-                    self.speak(f'Расписание на время {num2words(time[0], lang='ru')} {num2words(time[1], lang='ru')}')
-            else:
-                self.speak('Укажите день недели')
+            schedule_by_day(command, self.speak)
 
         elif qr.get_intent(command) == 'weather':
             own = OWM(os.getenv('API_KEY_WEATHER'))
@@ -148,7 +129,6 @@ class Voice:
             self.speak(self.ps.search_s(args))
 
         elif qr.get_intent(command) == 'wikipedia_search':
-            self.speak(self.wiki.search(args)['title'])
             self.speak(self.wiki.search(args)['content'])
 
         else:
@@ -166,10 +146,10 @@ class Voice:
                 time.sleep(0.5)
             else:
                 command = self.listen()
-                index = command.find('шустрик')
+                index = command.find('барсик')
                 if index != -1:
                     command = command[index:]
-                    if command.lower() == 'шустрик проснись':
+                    if command.lower() == 'барсик проснись':
                         self.is_listening = True
                         self.speak('Я проснулся')
 

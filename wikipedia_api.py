@@ -10,7 +10,6 @@ class Wiki:
         if query:
             page = wikipedia.page(query)
             return {
-                'title': page.title,
                 'content': ' '.join(self.split_reg(page.content)[:5])
             }
 
