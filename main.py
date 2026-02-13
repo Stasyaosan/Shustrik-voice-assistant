@@ -11,7 +11,7 @@ import os
 from open_program import ProgramSearcher
 from wikipedia_api import Wiki
 from commands.schedule_by_day import schedule_by_day
-import threading
+from Threads import SpeakThread
 
 audio_silero = Silero()
 qr = Query()
@@ -26,6 +26,8 @@ class Voice:
         self.is_listening = False
         self.ps = ProgramSearcher()
         self.wiki = Wiki()
+        self.q = SpeakThread()
+        self.q.start()
         with open('config.json', 'r', encoding='utf-8') as f:
             self.intents_keys = json.load(f)['intents'].keys()
 
@@ -33,9 +35,7 @@ class Voice:
 
     def speak(self, text):
         print(f"[speak] {text}")
-        audio_silero.silero_tts_basic(text)
-        # thread = threading.Thread(target=audio_silero.silero_tts_basic, args=(text,))
-        # thread.start()
+        self.q.add(audio_silero.silero_tts_basic, text)
 
     def stop(self):
         print("[stop] Остановка...")
@@ -99,6 +99,9 @@ class Voice:
         args = command
         for intent in self.intents_keys:
             args = self.delete_commands(command, intent)
+
+        if qr.get_intent(command):
+            self.q.clear()
 
         if qr.get_intent(command) == 'greeting':
             self.speak("Привет! Рад вас слышать!")
