@@ -1,6 +1,5 @@
 import json
 import time
-import speech_recognition as sr
 from datetime import datetime
 from siler_audio import Silero
 from num2words import num2words
@@ -12,6 +11,7 @@ from open_program import ProgramSearcher
 from wikipedia_api import Wiki
 from commands.schedule_by_day import schedule_by_day
 from Threads import SpeakThread
+from vosk_recognition import vosk_rec
 
 audio_silero = Silero()
 qr = Query()
@@ -21,8 +21,6 @@ load_dotenv()
 
 class Voice:
     def __init__(self):
-        self.recognizer = sr.Recognizer()
-        self.microphone = sr.Microphone()
         self.is_listening = False
         self.ps = ProgramSearcher()
         self.wiki = Wiki()
@@ -31,7 +29,7 @@ class Voice:
         with open('config.json', 'r', encoding='utf-8') as f:
             self.intents_keys = json.load(f)['intents'].keys()
 
-        self.calibrate_microphone()
+        # self.calibrate_microphone()
 
     def speak(self, text):
         print(f"[speak] {text}")
@@ -41,34 +39,22 @@ class Voice:
         print("[stop] Остановка...")
         self.is_listening = False
 
-    def calibrate_microphone(self):
-        print("Калибровка микрофона...")
-        try:
-            with self.microphone as source:
-                self.recognizer.adjust_for_ambient_noise(source, duration=2)
-            print("Калибровка завершена!")
-            return True
-        except Exception as e:
-            print(f"Ошибка калибровки микрофона: {e}")
-            return False
+    # def calibrate_microphone(self):
+    #     print("Калибровка микрофона...")
+    #     try:
+    #         with self.microphone as source:
+    #             self.recognizer.adjust_for_ambient_noise(source, duration=2)
+    #         print("Калибровка завершена!")
+    #         return True
+    #     except Exception as e:
+    #         print(f"Ошибка калибровки микрофона: {e}")
+    #         return False
 
     def listen(self):
         try:
-            with self.microphone as source:
-                print("Слушаю...")
-                # Увеличиваем timeout и phrase_time_limit для лучшего распознавания
-                audio = self.recognizer.listen(source, timeout=20, phrase_time_limit=20)
-
-            print("Распознаю речь...")
-            text = self.recognizer.recognize_google(audio, language='ru-RU')
-            print(f"Распознано: {text}")
+            text = vosk_rec()
             return text.lower()
 
-        except sr.WaitTimeoutError:
-            return ""
-        except sr.UnknownValueError:
-            print("Речь не распознана")
-            return ""
         except Exception as e:
             print(f"Ошибка слушания: {e}")
             return ""
