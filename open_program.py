@@ -2,12 +2,14 @@ import os
 from pathlib import Path
 from sentence_transformers import SentenceTransformer, util
 from googletrans import Translator
+from models import model_sentence_transformers
+
 
 class ProgramSearcher:
     def __init__(self):
         self.translator = Translator()
         self.programs = {}
-        self.model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
+        self.model = model_sentence_transformers
         self.search_desktop()
 
     def search_desktop(self):

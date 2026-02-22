@@ -1,7 +1,7 @@
 import pandas as pd
 from datetime import datetime
 
-df = pd.read_csv('schedule/9а.csv')
+df = pd.read_csv('9а.csv')
 
 d = {
     'пн': 1,

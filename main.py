@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 import os
 from open_program import ProgramSearcher
 from wikipedia_api import Wiki
-from commands.schedule_by_day import schedule_by_day
+from commands.schedule_by_day import *
 from Threads import SpeakThread
 from vosk_recognition import vosk_rec
 
@@ -100,7 +100,7 @@ class Voice:
             self.speak(f"Сейчас {a_h} {a_m}")
 
         elif qr.get_intent(command) == 'schedule_by_day':
-            schedule_by_day(command, self.speak)
+            schedule_subject(command, self.speak)
 
         elif qr.get_intent(command) == 'weather':
             own = OWM(os.getenv('API_KEY_WEATHER'))
