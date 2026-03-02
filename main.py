@@ -103,11 +103,6 @@ class Voice:
             schedule_subject(command, self.speak)
 
         elif qr.get_intent(command) == 'weather':
-            own = OWM(os.getenv('API_KEY_WEATHER'))
-            mgr = own.weather_manager()
-            obs = mgr.weather_at_place('Москва,RU')
-            weather = obs.weather
-            res = f'Температура: {num2words(round(weather.temperature('celsius')['temp']), lang='ru')} градусов. Влажность: {num2words(round(weather.humidity), lang='ru')}%'
             self.speak(f"Сейчас {res}")
 
         elif qr.get_intent(command) == 'farewell':

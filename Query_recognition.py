@@ -16,7 +16,7 @@ class Query:
         self.classifier = LinearSVC()
         self.prepare_corpus()
 
-    def get_intent(self, request, k=0.4):
+    def get_intent(self, request, k=0.3):
         best_intent = self.classifier.predict(self.vectorizer.transform([request]))[0]
         index_of_best_intent = list(self.classifier_probability.classes_).index(best_intent)
         probabilities = self.classifier_probability.predict_proba(self.vectorizer.transform([request]))[0]
