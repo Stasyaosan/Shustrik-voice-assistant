@@ -5,3 +5,5 @@ __pycache__
 test
 9а.csv
 models
+data_weather.txt
+weather_data.csv

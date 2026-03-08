@@ -1,17 +1,15 @@
 import json
 import time
-from datetime import datetime
 from siler_audio import Silero
-from num2words import num2words
 from Query_recognition import Query
-from pyowm import OWM
 from dotenv import load_dotenv
-import os
 from open_program import ProgramSearcher
 from wikipedia_api import Wiki
 from commands.schedule_by_day import *
 from Threads import SpeakThread
 from vosk_recognition import vosk_rec
+from models import model_sentence_transformers
+from weather import get_weather
 
 audio_silero = Silero()
 qr = Query()
@@ -21,6 +19,7 @@ load_dotenv()
 
 class Voice:
     def __init__(self):
+        self.model_transformers = model_sentence_transformers
         self.is_listening = False
         self.ps = ProgramSearcher()
         self.wiki = Wiki()
@@ -103,7 +102,7 @@ class Voice:
             schedule_subject(command, self.speak)
 
         elif qr.get_intent(command) == 'weather':
-            self.speak(f"Сейчас {res}")
+            self.speak(get_weather(command, self.model_transformers))
 
         elif qr.get_intent(command) == 'farewell':
             self.speak("До свидания! Я заснул.")
