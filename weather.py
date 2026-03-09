@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 from models import model_sentence_transformers
 from sentence_transformers import util
-from datetime import datetime
+from datetime import datetime, timedelta
 import locale
 import pandas as pd
 from num2words import num2words
@@ -41,10 +41,10 @@ def get_weather(query, model=None):
 
     if res:
         f = res[0]['name']
+    now = datetime.now()
 
     if f == 'сегодня':
         locale.setlocale(locale.LC_TIME, 'russian')
-        now = datetime.now()
         day_of_month = now.day
         month_short = now.strftime("%b")
         key = f'{day_of_month} {month_short}'
@@ -54,8 +54,17 @@ def get_weather(query, model=None):
             f'Сегодня в Москве минимальная температура {num2words(today.iloc[0]['temp_min'], lang='ru')} градусов. '
             f'Максимальная температура {num2words(today.iloc[0]['temp_max'], lang='ru')} градусов. '
             f'{today.iloc[0]['description']}')
+
     elif f == 'завтра':
-        pass
+        next_day = now + timedelta(days=1)
+        day_of_month = next_day.day
+        month_short = next_day.strftime("%b")
+        key = f'{day_of_month} {month_short}'
+        today = data_weather[data_weather['date'] == key]
+        return (
+            f'Погода на завтра в Москве. Минимальная температура {num2words(today.iloc[0]['temp_min'], lang='ru')} градусов. '
+            f'Максимальная температура {num2words(today.iloc[0]['temp_max'], lang='ru')} градусов. '
+            f'{today.iloc[0]['description']}. ')
     else:
         m = ["январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь",
              "декабрь"]

@@ -10,6 +10,7 @@ from Threads import SpeakThread
 from vosk_recognition import vosk_rec
 from models import model_sentence_transformers
 from weather import get_weather
+from parser_weather import parser_weather
 
 audio_silero = Silero()
 qr = Query()
@@ -102,11 +103,13 @@ class Voice:
             schedule_subject(command, self.speak)
 
         elif qr.get_intent(command) == 'weather':
+            parser_weather()
             self.speak(get_weather(command, self.model_transformers))
 
         elif qr.get_intent(command) == 'farewell':
             self.speak("До свидания! Я заснул.")
             self.is_listening = False
+
 
         elif qr.get_intent(command) == 'open_program':
             self.speak(self.ps.search_s(args))
