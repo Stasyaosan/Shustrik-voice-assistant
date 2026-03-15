@@ -109,8 +109,7 @@ class Voice:
         elif qr.get_intent(command) == 'farewell':
             self.speak("До свидания! Я заснул.")
             self.is_listening = False
-
-
+            
         elif qr.get_intent(command) == 'open_program':
             self.speak(self.ps.search_s(args))
 

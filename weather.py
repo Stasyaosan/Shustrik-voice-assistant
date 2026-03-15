@@ -5,10 +5,37 @@ from datetime import datetime, timedelta
 import locale
 import pandas as pd
 from num2words import num2words
+import pymorphy3
 
 load_dotenv()
 
 model_transformers = model_sentence_transformers
+morph = pymorphy3.MorphAnalyzer()
+
+
+def get_date_by_weekday(target_weekday):
+    weekdays = {
+        "понедельник": 1,
+        "вторник": 2,
+        "среда": 3,
+        "четверг": 4,
+        "пятница": 5,
+        "суббота": 6,
+        "воскресенье": 7
+    }
+
+    target_weekday = weekdays[target_weekday]
+
+    today = datetime.now()
+    current_weekday = today.isoweekday()
+    days_diff = target_weekday - current_weekday
+
+    if days_diff < 0:
+        days_diff += 7
+
+    target_date = today + timedelta(days=days_diff)
+    months = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"]
+    return f'{target_date.day} {months[target_date.month - 1]}'
 
 
 def get_word_list(query, list_, model=None):
@@ -32,12 +59,22 @@ def get_word_list(query, list_, model=None):
     return res
 
 
+def speak_weather(city, temp, today, day):
+    return (
+        f'{day} в {city.inflect({'datv'}).word} минимальная температура {num2words(today.iloc[0]['temp_min'], lang='ru')} {temp.make_agree_with_number(today.iloc[0]['temp_min']).word}. '
+        f'Максимальная температура {num2words(today.iloc[0]['temp_max'], lang='ru')} {temp.make_agree_with_number(today.iloc[0]['temp_max'], ).word}. '
+        f'{today.iloc[0]['description']}.')
+
+
 def get_weather(query, model=None):
     data_weather = pd.read_csv('weather_data.csv')
 
-    days_of_week = ['сегодня', 'завтра']
-    res = get_word_list(query, days_of_week)
+    days = ['сегодня', 'завтра']
+    res = get_word_list(query, days)
     f = None
+
+    temp = morph.parse('градус')[0]
+    city = morph.parse('москва')[0]
 
     if res:
         f = res[0]['name']
@@ -50,10 +87,7 @@ def get_weather(query, model=None):
         key = f'{day_of_month} {month_short}'
         today = data_weather[data_weather['date'] == key]
 
-        return (
-            f'Сегодня в Москве минимальная температура {num2words(today.iloc[0]['temp_min'], lang='ru')} градусов. '
-            f'Максимальная температура {num2words(today.iloc[0]['temp_max'], lang='ru')} градусов. '
-            f'{today.iloc[0]['description']}')
+        return speak_weather(city, temp, today, 'сегодня')
 
     elif f == 'завтра':
         next_day = now + timedelta(days=1)
@@ -61,15 +95,21 @@ def get_weather(query, model=None):
         month_short = next_day.strftime("%b")
         key = f'{day_of_month} {month_short}'
         today = data_weather[data_weather['date'] == key]
-        return (
-            f'Погода на завтра в Москве. Минимальная температура {num2words(today.iloc[0]['temp_min'], lang='ru')} градусов. '
-            f'Максимальная температура {num2words(today.iloc[0]['temp_max'], lang='ru')} градусов. '
-            f'{today.iloc[0]['description']}. ')
+        return speak_weather(city, temp, today, 'завтра')
+
     else:
-        m = ["январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь",
-             "декабрь"]
+        days_of_week = ["понедельник", "вторник", "среда", "четверг", "пятница", "суббота", "воскресенье"]
+        res = get_word_list(query, days_of_week, model)
+        if res:
+            key = get_date_by_weekday(res[0]['name'])
+            print(key)
+            today = data_weather[data_weather['date'] == key]
+            day = ''
+            if res[0]['name'] == 'среда':
+                day = 'среду'
+            elif res[0]['name'] == 'пятница':
+                day = 'пятницу'
+            elif res[0]['name'] == 'суббота':
+                day = 'субботу'
+            return speak_weather(city, temp, today, day)
 
-        print(get_word_list(query, m, model))
-
-
-get_weather('какая сегодня погода')

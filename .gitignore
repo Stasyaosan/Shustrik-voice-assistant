@@ -7,3 +7,4 @@ test
 models
 data_weather.txt
 weather_data.csv
+geopos.py
