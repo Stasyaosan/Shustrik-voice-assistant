@@ -5,10 +5,12 @@ import pandas as pd
 
 def parser_weather():
     url = 'https://www.gismeteo.ru/weather-moscow-4368/month/'
+    now_url = 'https://www.gismeteo.ru/weather-moscow-4368/now/'
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         'Accept': 'text/html'
     }
+
     try:
         response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
@@ -18,6 +20,17 @@ def parser_weather():
     except:
         with open('data_weather.txt', 'r', encoding='utf-8') as f:
             text = f.read()
+
+    try:
+        response_now = requests.get(now_url, headers=headers, timeout=10)
+        response_now.raise_for_status()
+        text_now = response_now.text
+        with open('data_weather.txt', 'w', encoding='utf-8') as f:
+            f.write(text)
+    except:
+        with open('data_weather.txt', 'r', encoding='utf-8') as f:
+            text_now = f.read()
+
     soup = BeautifulSoup(text, 'html.parser')
     weather_items = soup.find_all(['div', 'a'], 'row-item-month-date')
     if not weather_items:
@@ -64,3 +77,32 @@ def parser_weather():
                 })
         df = pd.DataFrame(weather_data)
         df.to_csv('weather_data.csv')
+
+    soup_now = BeautifulSoup(text_now, 'html.parser')
+    now_weather = soup_now.find('div', class_='now-weather').find('temperature-value').get('value', '')
+    now_feel = soup_now.find('div', class_='now-feel').find('temperature-value').get('value', '')
+    now_desc = soup_now.find('div', class_='now-desc').text.strip()
+    now_localdate = soup_now.find('div', class_='now-localdate').text
+
+    now_ps = soup_now.find_all('div', class_='now-info-item')
+    now_hum = ''
+    for i in now_ps:
+        title = i.find('div', class_='item-title').text.strip()
+        if title == 'Влажность':
+            info = i.find('div', class_='item-information').find('div', class_='item-value').text
+            now_hum = info
+            break
+
+    weather_data_now = [{
+        'datetime': now_localdate.strip(),
+        'now_weather': now_weather.strip(),
+        'now_feel': now_feel.strip(),
+        'now_desc': now_desc.strip(),
+        'now_hum': now_hum.strip()
+    }]
+
+    df = pd.DataFrame(weather_data_now)
+    df.to_csv('weather_data_now.csv')
+
+
+parser_weather()

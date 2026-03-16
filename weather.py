@@ -61,7 +61,7 @@ def get_word_list(query, list_, model=None):
 
 def speak_weather(city, temp, today, day):
     return (
-        f'{day} в {city.inflect({'datv'}).word} минимальная температура {num2words(today.iloc[0]['temp_min'], lang='ru')} {temp.make_agree_with_number(today.iloc[0]['temp_min']).word}. '
+        f'в {day} в {city.inflect({'datv'}).word} минимальная температура {num2words(today.iloc[0]['temp_min'], lang='ru')} {temp.make_agree_with_number(today.iloc[0]['temp_min']).word}. '
         f'Максимальная температура {num2words(today.iloc[0]['temp_max'], lang='ru')} {temp.make_agree_with_number(today.iloc[0]['temp_max'], ).word}. '
         f'{today.iloc[0]['description']}.')
 
@@ -104,7 +104,7 @@ def get_weather(query, model=None):
             key = get_date_by_weekday(res[0]['name'])
             print(key)
             today = data_weather[data_weather['date'] == key]
-            day = ''
+            day = res[0]['name']
             if res[0]['name'] == 'среда':
                 day = 'среду'
             elif res[0]['name'] == 'пятница':
