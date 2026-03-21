@@ -53,8 +53,8 @@ class ProgramSearcher:
         program_name = self.translator.translate(program['name'], dest='ru')
         try:
             os.startfile(program['path'])
-            print(f'Запущено: {program['name']}')
+            print(f'Запущено: {program["name"]}')
             return f'Запущено {program_name.text}'
         except Exception as e:
-            print(f'Ошибка при запуске {program['name']}')
+            print(f'Ошибка при запуске {program["name"]}')
             return f'Ошибка при запуске {program_name.text}'

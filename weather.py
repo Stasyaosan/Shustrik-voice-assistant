@@ -64,9 +64,10 @@ def speak_weather(city, temp, today, day):
     if day == 'сегодня':
         v = ''
     return (
-        f'{v}{day} в {city.inflect({'datv'}).word} минимальная температура {num2words(today.iloc[0]['temp_min'], lang='ru')} {temp.make_agree_with_number(today.iloc[0]['temp_min']).word}. '
-        f'Максимальная температура {num2words(today.iloc[0]['temp_max'], lang='ru')} {temp.make_agree_with_number(today.iloc[0]['temp_max']).word}. '
-        f'{today.iloc[0]['description']}')
+        f'{v}{day} в {city.inflect({"datv"}).word} минимальная температура {num2words(today.iloc[0]["temp_min"], lang="ru")} {temp.make_agree_with_number(today.iloc[0]["temp_min"]).word}. '
+        f'Максимальная температура {num2words(today.iloc[0]["temp_max"], lang="ru")} {temp.make_agree_with_number(today.iloc[0]["temp_max"]).word}. '
+        f'{today.iloc[0]["description"]}')
+
 
 
 def get_weather(query, model=None):
@@ -117,6 +118,6 @@ def get_weather(query, model=None):
         else:
             data_weather = pd.read_csv('weather_data_now.csv')
             return (
-                f'сейчас в {city.inflect({'datv'}).word} {num2words(data_weather.iloc[0]['now_weather'], lang='ru')} {temp.make_agree_with_number(data_weather.iloc[0]['now_weather']).word}. '
-                f'ощущается как {num2words(data_weather.iloc[0]['now_feel'], lang='ru')} {temp.make_agree_with_number(data_weather.iloc[0]['now_feel']).word}. '
-                f'{data_weather.iloc[0]['now_desc']}')
+                f'сейчас в {city.inflect({"datv"}).word} {num2words(data_weather.iloc[0]["now_weather"], lang="ru")} {temp.make_agree_with_number(data_weather.iloc[0]["now_weather"]).word}. '
+                f'ощущается как {num2words(data_weather.iloc[0]["now_feel"], lang="ru")} {temp.make_agree_with_number(data_weather.iloc[0]["now_feel"]).word}. '
+                f'{data_weather.iloc[0]["now_desc"]}')

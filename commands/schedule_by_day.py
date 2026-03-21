@@ -16,7 +16,7 @@ def schedule_speak(speak, d, count=0, m=False):
         schedule = get_schedule(schedule[1], m)
         for index_n, data_schedule in schedule.items():
             time = data_schedule[0].split(':')
-            speak(f'Расписание на время {num2words(time[0], lang='ru')} {num2words(time[1], lang='ru')}')
+            speak(f'Расписание на время {num2words(time[0], lang="ru")} {num2words(time[1], lang="ru")}')
             speak(f'Предмет: {data_schedule[1]}')
 
 
@@ -36,7 +36,6 @@ def schedule_by_day(command, speak):
         schedule = get_schedule(day)
         for index_n, data_schedule in schedule.items():
             time = data_schedule[0].split(':')
-            speak(f'Расписание на время {num2words(time[0], lang='ru')} {num2words(time[1], lang='ru')}')
             speak(f'Предмет: {data_schedule[1]}')
         if schedule:
             pass
@@ -103,7 +102,6 @@ def schedule_subject(query, speak):
             print(subject_current)
             for i in subject_current:
                 time = i[0].split(':')
-                speak(f'{i[1]} в {num2words(time[0], lang='ru')} {num2words(time[1], lang='ru')}')
                 speak(f'Преподаватель: {i[3]}')
         else:
             schedule_by_day(day_of_week_full, speak)
