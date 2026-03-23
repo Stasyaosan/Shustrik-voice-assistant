@@ -116,7 +116,7 @@ def get_weather(query, model=None):
             return speak_weather(city, temp, today, day)
         else:
             data_weather = pd.read_csv('weather_data_now.csv')
-            return (
+        return (
                 f'сейчас в {city.inflect({'datv'}).word} {num2words(data_weather.iloc[0]['now_weather'], lang='ru')} {temp.make_agree_with_number(data_weather.iloc[0]['now_weather']).word}. '
                 f'ощущается как {num2words(data_weather.iloc[0]['now_feel'], lang='ru')} {temp.make_agree_with_number(data_weather.iloc[0]['now_feel']).word}. '
                 f'{data_weather.iloc[0]['now_desc']}')

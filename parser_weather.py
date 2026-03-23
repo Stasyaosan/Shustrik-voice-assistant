@@ -1,11 +1,21 @@
+import json
+
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
+from user_data.change_city import get_weather_link
+import os
 
 
 def parser_weather():
-    url = 'https://www.gismeteo.ru/weather-moscow-4368/month/'
-    now_url = 'https://www.gismeteo.ru/weather-moscow-4368/now/'
+    if not os.path.exists('user_data/current_city.json'):
+        get_weather_link()
+
+    with open('user_data/current_city.json', 'r', encoding='utf-8') as f:
+        link = json.load(f)['link']
+
+    url = f'{link}/month/'
+    now_url = f'{link}/now/'
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         'Accept': 'text/html'

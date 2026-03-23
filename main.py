@@ -1,5 +1,8 @@
 import json
 import time
+
+import pymorphy3
+
 from siler_audio import Silero
 from Query_recognition import Query
 from dotenv import load_dotenv
@@ -11,6 +14,8 @@ from vosk_recognition import vosk_rec
 from models import model_sentence_transformers
 from weather import get_weather
 from parser_weather import parser_weather
+from user_data.change_city import change_city
+from pymorphy3 import MorphAnalyzer
 
 audio_silero = Silero()
 qr = Query()
@@ -26,6 +31,7 @@ class Voice:
         self.wiki = Wiki()
         self.q = SpeakThread()
         self.q.start()
+        self.morph = pymorphy3.MorphAnalyzer()
         with open('config.json', 'r', encoding='utf-8') as f:
             self.intents_keys = json.load(f)['intents'].keys()
 
@@ -115,6 +121,11 @@ class Voice:
 
         elif qr.get_intent(command) == 'wikipedia_search':
             self.speak(self.wiki.search(args)['content'])
+
+        elif qr.get_intent(command) == 'change_city':
+            city = change_city(command)
+            print(city)
+            self.speak(f'Город изменён на {city}')
 
         else:
             self.speak("Пока не понимаю эту команду.")
