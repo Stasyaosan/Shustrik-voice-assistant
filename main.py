@@ -124,6 +124,7 @@ class Voice:
 
         elif qr.get_intent(command) == 'change_city':
             city = change_city(command)
+            print(command)
             print(city)
             self.speak(f'Город изменён на {city}')
 

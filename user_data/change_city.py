@@ -5,13 +5,15 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.keys import Keys
 import time
 import pandas as pd
 
 
 def get_weather_link(city=''):
-    driver = webdriver.Chrome()
+    chrome_options = Options()
+    chrome_options.add_argument("--headless=new")
+
+    driver = webdriver.Chrome(options=chrome_options)
     driver.get('https://www.gismeteo.ru/')
 
     input_element = WebDriverWait(driver, 10).until(
@@ -32,6 +34,7 @@ def get_weather_link(city=''):
         link = city_items[0].get_attribute('href')
         with open('user_data/current_city.json', 'w', encoding='utf-8') as f:
             json.dump({'name': city, 'link': link}, f, indent=4)
+        driver.quit()
         return True
 
     driver.quit()
@@ -47,6 +50,7 @@ def change_city(words):
         j = False
         for idx, row in df.iterrows():
             row_ = row['namecase'].values()
+            i = f'{i[0].upper()}{i[1:]}'
             if i in row_:
                 word = row['name']
                 j = True

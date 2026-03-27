@@ -5,12 +5,8 @@ import sounddevice as sd
 class Silero:
     def __init__(self):
         self.device = torch.device('cpu')
-        self.model, example_text = torch.hub.load(
-            repo_or_dir='snakers4/silero-models',
-            model='silero_tts',
-            language='ru',
-            speaker='v3_1_ru'
-        )
+        model_path = 'models/silero/v3_1_ru.pt'  # путь к скачанному файлу
+        self.model = torch.package.PackageImporter(model_path).load_pickle("tts_models", "model")
 
     def silero_tts_basic(self, text, speaker='aidar'):
         self.model.to(self.device)
