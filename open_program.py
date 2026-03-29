@@ -1,42 +1,26 @@
 import os
 from pathlib import Path
-from sentence_transformers import SentenceTransformer, util
+from sentence_transformers import util
 from googletrans import Translator
 from models import model_sentence_transformers
+from search_programs import find_programs
 
 
 class ProgramSearcher:
     def __init__(self):
         self.translator = Translator()
-        self.programs = {}
         self.model = model_sentence_transformers
-        self.search_desktop()
-
-    def search_desktop(self):
-        desktop_paths = [
-            os.path.join(os.environ['USERPROFILE'], 'Desktop')
-        ]
-        program_names = []
-        program_paths = []
-
-        for desktop_path in desktop_paths:
-            if os.path.exists(desktop_path):
-                for lnk_file in Path(desktop_path).glob('*.lnk'):
-                    name = lnk_file.stem.lower()
-                    program_names.append(name)
-                    program_paths.append(str(lnk_file))
-
-        if program_names:
-            self.programs_embs = self.model.encode(program_names, convert_to_tensor=True)
-            self.program_names = program_names
-            self.program_paths = program_paths
+        programs = find_programs()
+        self.program_names = programs.keys()
+        self.program_paths = programs.values()
+        self.programs_embs = self.model.encode(self.program_names, convert_to_tensor=True)
 
     def search_s(self, query):
         query_em = self.model.encode(query, convert_to_tensor=True)
         s = util.cos_sim(query_em, self.programs_embs)[0]
         res = []
         for idx, i in enumerate(s):
-            if i.item() > 0.5:
+            if i.item() >= 0.8:
                 res.append({
                     'index': idx,
                     'k': i.item(),
