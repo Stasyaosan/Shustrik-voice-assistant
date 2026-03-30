@@ -6,7 +6,6 @@ import pymorphy3
 from siler_audio import Silero
 from Query_recognition import Query
 from dotenv import load_dotenv
-from open_program import ProgramSearcher
 from wikipedia_api import Wiki
 from commands.schedule_by_day import *
 from Threads import SpeakThread
@@ -15,7 +14,7 @@ from models import model_sentence_transformers
 from weather import get_weather
 from parser_weather import parser_weather
 from user_data.change_city import change_city
-from pymorphy3 import MorphAnalyzer
+from open_program import ProgramSearcher
 
 audio_silero = Silero()
 qr = Query()
@@ -44,17 +43,6 @@ class Voice:
     def stop(self):
         print("[stop] Остановка...")
         self.is_listening = False
-
-    # def calibrate_microphone(self):
-    #     print("Калибровка микрофона...")
-    #     try:
-    #         with self.microphone as source:
-    #             self.recognizer.adjust_for_ambient_noise(source, duration=2)
-    #         print("Калибровка завершена!")
-    #         return True
-    #     except Exception as e:
-    #         print(f"Ошибка калибровки микрофона: {e}")
-    #         return False
 
     def listen(self):
         try:
@@ -115,8 +103,9 @@ class Voice:
         elif qr.get_intent(command) == 'farewell':
             self.speak("До свидания! Я заснул.")
             self.is_listening = False
-            
+
         elif qr.get_intent(command) == 'open_program':
+            print(args)
             self.speak(self.ps.search_s(args))
 
         elif qr.get_intent(command) == 'wikipedia_search':
@@ -133,7 +122,7 @@ class Voice:
 
     def listening_loop(self):
         print("Цикл прослушивания запущен")
-        # self.speak("Ассистент запущен. Говорите команды")
+        # self.speak("Ассистент запущен.")
 
         while True:
             if self.is_listening:

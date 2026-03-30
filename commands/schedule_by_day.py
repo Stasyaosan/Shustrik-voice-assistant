@@ -107,5 +107,6 @@ def schedule_subject(query, speak):
                 speak(f'Преподаватель: {i[3]}')
         else:
             schedule_by_day(day_of_week_full, speak)
+            print(1)
     else:
         speak('Расписание не найдено')
