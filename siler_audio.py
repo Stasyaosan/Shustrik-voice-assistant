@@ -11,7 +11,6 @@ class Silero:
     def silero_tts_basic(self, text, speaker='aidar'):
         self.model.to(self.device)
 
-        # Генерация речи
         self.sample_rate = 48000
         audio = self.model.apply_tts(
             text=text,

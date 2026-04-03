@@ -23,7 +23,6 @@ def get_schedule(day_of_week, m=False):
 
     if m:
         pn = pn[pn['часы'] >= current_time_hour]
-        print(pn)
     pn = pn.reset_index(drop=True)
     res = {}
     index = 0
@@ -34,4 +33,9 @@ def get_schedule(day_of_week, m=False):
                 res[i].append(j)
             else:
                 res[i] = [j]
-    return res
+
+    if res:
+        if m:
+            return {0: res[0]}
+
+        return res
