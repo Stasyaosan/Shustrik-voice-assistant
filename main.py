@@ -1,8 +1,6 @@
 import json
 import time
-
 import pymorphy3
-
 from siler_audio import Silero
 from Query_recognition import Query
 from dotenv import load_dotenv

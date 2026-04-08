@@ -18,9 +18,12 @@ def schedule_speak(speak, d, count=0, m=False):
         for index_n, data_schedule in schedule.items():
             time = data_schedule[0].split(':')
             speak(f'Расписание на время {num2words(time[0], lang='ru')} {num2words(time[1], lang='ru')}')
-            speak(
-                f'Предмет: {data_schedule[1]}, Учитель: {data_schedule[3]}, '
-                f'Кабинет: {num2words(data_schedule[2][:-1], lang='ru')} {data_schedule[2][-1]}')
+            if str(data_schedule[2][:-1]).isdigit():
+                speak(
+                    f'Предмет: {data_schedule[1]}, Учитель: {data_schedule[3]}, '
+                    f'Кабинет: {num2words(int(data_schedule[2][:-1]), lang='ru')} {data_schedule[2][-1]}')
+            else:
+                speak(f'Предмет: {data_schedule[1]}, Учитель: {data_schedule[3]}')
 
 
 def schedule_by_day(command, speak):
