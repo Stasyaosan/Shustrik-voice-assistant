@@ -7,6 +7,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 import pandas as pd
+from urls.config import URLS
 
 
 def get_weather_link(city=''):
@@ -32,7 +33,7 @@ def get_weather_link(city=''):
 
     if city_items:
         link = city_items[0].get_attribute('href')
-        with open('user_data/current_city.json', 'w', encoding='utf-8') as f:
+        with open(URLS['current_city'], 'w', encoding='utf-8') as f:
             json.dump({'name': city, 'link': link}, f, indent=4)
         driver.quit()
         return True
@@ -42,7 +43,7 @@ def get_weather_link(city=''):
 
 
 def change_city(words):
-    df = pd.read_json('user_data/russia-cities.json')
+    df = pd.read_json(URLS['russia_cities'])
 
     words = words.split()
     word = ''

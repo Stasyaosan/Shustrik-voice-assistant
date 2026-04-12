@@ -3,12 +3,13 @@ import json
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import LinearSVC
+from urls.config import URLS
 
 
 class Query:
 
     def __init__(self):
-        with open('config.json', 'r', encoding='utf-8') as f:
+        with open(URLS['config'], 'r', encoding='utf-8') as f:
             Query.config = json.load(f)
 
         self.vectorizer = TfidfVectorizer(analyzer="char", ngram_range=(2, 3))

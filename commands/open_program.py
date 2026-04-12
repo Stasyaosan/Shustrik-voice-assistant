@@ -1,8 +1,8 @@
 import os
 from sentence_transformers import util
 from googletrans import Translator
-from models import model_sentence_transformers
-from search_programs import find_programs
+from utils.models import model_sentence_transformers
+from .search_programs import find_programs
 
 
 class ProgramSearcher:

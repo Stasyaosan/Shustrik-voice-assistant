@@ -1,7 +1,8 @@
 import pandas as pd
 from datetime import datetime
+from urls.config import URLS
 
-df = pd.read_csv('9а.csv')
+df = pd.read_csv(URLS['schedule'])
 
 d = {
     'пн': 1,

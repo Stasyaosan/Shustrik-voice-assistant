@@ -1,17 +1,17 @@
 import json
-
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 from user_data.change_city import get_weather_link
 import os
+from urls.config import URLS
 
 
 def parser_weather():
-    if not os.path.exists('user_data/current_city.json'):
+    if not os.path.exists(URLS['current_city']):
         get_weather_link()
 
-    with open('user_data/current_city.json', 'r', encoding='utf-8') as f:
+    with open(URLS['current_city'], 'r', encoding='utf-8') as f:
         link = json.load(f)['link']
 
     url = f'{link}/month/'
@@ -25,20 +25,20 @@ def parser_weather():
         response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
         text = response.text
-        with open('data_weather.txt', 'w', encoding='utf-8') as f:
+        with open(URLS['weather_txt'], 'w', encoding='utf-8') as f:
             f.write(text)
     except:
-        with open('data_weather.txt', 'r', encoding='utf-8') as f:
+        with open(URLS['weather_txt'], 'r', encoding='utf-8') as f:
             text = f.read()
 
     try:
         response_now = requests.get(now_url, headers=headers, timeout=10)
         response_now.raise_for_status()
         text_now = response_now.text
-        with open('data_weather.txt', 'w', encoding='utf-8') as f:
+        with open(URLS['weather_txt'], 'w', encoding='utf-8') as f:
             f.write(text)
     except:
-        with open('data_weather.txt', 'r', encoding='utf-8') as f:
+        with open(URLS['weather_txt'], 'r', encoding='utf-8') as f:
             text_now = f.read()
 
     soup = BeautifulSoup(text, 'html.parser')
@@ -86,7 +86,7 @@ def parser_weather():
                     'description': description
                 })
         df = pd.DataFrame(weather_data)
-        df.to_csv('weather_data.csv')
+        df.to_csv(URLS['weather_csv'])
 
     soup_now = BeautifulSoup(text_now, 'html.parser')
     now_weather = soup_now.find('div', class_='now-weather').find('temperature-value').get('value', '')
@@ -112,7 +112,4 @@ def parser_weather():
     }]
 
     df = pd.DataFrame(weather_data_now)
-    df.to_csv('weather_data_now.csv')
-
-
-parser_weather()
+    df.to_csv(URLS['weather_now'])

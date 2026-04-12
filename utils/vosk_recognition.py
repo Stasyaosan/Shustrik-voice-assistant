@@ -1,15 +1,10 @@
 import pyaudio
 import json
 from vosk import Model, KaldiRecognizer
-from dotenv import load_dotenv
-import os
+from urls.config import URLS
 
-load_dotenv()
+model = Model(URLS['vosk_model'])
 
-# Загружаем модель
-model = Model(os.getenv('VOSK_MODEL'))
-
-# Частота 16000 обязательна для большинства моделей
 recognizer = KaldiRecognizer(model, 16000)
 
 

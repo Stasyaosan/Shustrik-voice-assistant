@@ -1,11 +1,12 @@
 import torch
 import sounddevice as sd
+from urls.config import URLS
 
 
 class Silero:
     def __init__(self):
         self.device = torch.device('cpu')
-        model_path = 'models/silero/v3_1_ru.pt'
+        model_path = URLS['silero_model']
         self.model = torch.package.PackageImporter(model_path).load_pickle("tts_models", "model")
 
     def silero_tts_basic(self, text, speaker='aidar'):

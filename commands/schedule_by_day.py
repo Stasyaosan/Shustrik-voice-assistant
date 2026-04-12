@@ -1,7 +1,7 @@
 from datetime import datetime
 from num2words import num2words
-from parser_csv import get_schedule
-from models import model_sentence_transformers
+from parsers.parser_csv import get_schedule
+from utils.models import model_sentence_transformers
 from sentence_transformers import util
 
 

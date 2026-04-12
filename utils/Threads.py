@@ -1,6 +1,6 @@
 import threading
 import queue
-from siler_audio import Silero
+from .siler_audio import Silero
 
 
 class SpeakThread:

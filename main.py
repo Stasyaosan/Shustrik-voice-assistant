@@ -1,18 +1,23 @@
 import json
 import time
+from datetime import datetime
 import pymorphy3
-from siler_audio import Silero
-from Query_recognition import Query
+from num2words import num2words
 from dotenv import load_dotenv
-from wikipedia_api import Wiki
-from commands.schedule_by_day import *
-from Threads import SpeakThread
-from vosk_recognition import vosk_rec
-from models import model_sentence_transformers
-from weather import get_weather
-from parser_weather import parser_weather
+
+from parsers.parser_weather import parser_weather
 from user_data.change_city import change_city
-from open_program import ProgramSearcher
+
+from utils.Threads import SpeakThread
+from utils.vosk_recognition import vosk_rec
+from utils.models import model_sentence_transformers
+from utils.siler_audio import Silero
+from utils.Query_recognition import Query
+
+from commands.open_program import ProgramSearcher
+from commands.wikipedia_api import Wiki
+from commands.schedule_by_day import schedule_subject
+from commands.weather import get_weather
 
 audio_silero = Silero()
 qr = Query()

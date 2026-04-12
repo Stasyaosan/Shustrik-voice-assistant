@@ -1,11 +1,12 @@
 from dotenv import load_dotenv
-from models import model_sentence_transformers
+from utils.models import model_sentence_transformers
 from sentence_transformers import util
 from datetime import datetime, timedelta
 import locale
 import pandas as pd
 from num2words import num2words
 import pymorphy3
+from urls.config import URLS
 
 load_dotenv()
 
@@ -70,7 +71,8 @@ def speak_weather(city, temp, today, day):
 
 
 def get_weather(query, model=None):
-    data_weather = pd.read_csv('weather_data.csv')
+    locale.setlocale(locale.LC_TIME, 'russian')
+    data_weather = pd.read_csv(URLS['weather_csv'])
 
     days = ['сегодня', 'завтра']
     res = get_word_list(query, days)
@@ -84,7 +86,6 @@ def get_weather(query, model=None):
     now = datetime.now()
 
     if f == 'сегодня':
-        locale.setlocale(locale.LC_TIME, 'russian')
         day_of_month = now.day
         month_short = now.strftime("%b")
         key = f'{day_of_month} {month_short}'
@@ -98,6 +99,8 @@ def get_weather(query, model=None):
         month_short = next_day.strftime("%b")
         key = f'{day_of_month} {month_short}'
         today = data_weather[data_weather['date'] == key]
+        print(data_weather['date'])
+        print(key)
         return speak_weather(city, temp, today, 'завтра')
 
     else:
@@ -115,7 +118,7 @@ def get_weather(query, model=None):
                 day = 'субботу'
             return speak_weather(city, temp, today, day)
         else:
-            data_weather = pd.read_csv('weather_data_now.csv')
+            data_weather = pd.read_csv(URLS['weather_now'])
         return (
                 f'сейчас в {city.inflect({'datv'}).word} {num2words(data_weather.iloc[0]['now_weather'], lang='ru')} {temp.make_agree_with_number(data_weather.iloc[0]['now_weather']).word}. '
                 f'ощущается как {num2words(data_weather.iloc[0]['now_feel'], lang='ru')} {temp.make_agree_with_number(data_weather.iloc[0]['now_feel']).word}. '
