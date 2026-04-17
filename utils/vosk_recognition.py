@@ -35,6 +35,7 @@ def vosk_rec():
 
     except KeyboardInterrupt:
         print("\nОстановлено")
+        raise SystemExit
 
     stream.stop_stream()
     stream.close()

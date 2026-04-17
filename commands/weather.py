@@ -1,3 +1,5 @@
+import json
+
 from dotenv import load_dotenv
 from utils.models import model_sentence_transformers
 from sentence_transformers import util
@@ -65,12 +67,12 @@ def get_word_list(query, list_, model=None):
 
 def speak_weather(city, temp, today, day):
     v = 'в '
-    if day == 'сегодня':
+    if day in ['сегодня', 'завтра']:
         v = ''
     return (
         f'{v}{day} в {city.inflect({'datv'}).word} минимальная температура {num2words(today.iloc[0]['temp_min'], lang='ru')} {temp.make_agree_with_number(today.iloc[0]['temp_min']).word}. '
         f'Максимальная температура {num2words(today.iloc[0]['temp_max'], lang='ru')} {temp.make_agree_with_number(today.iloc[0]['temp_max']).word}. '
-        f'{today.iloc[0]['description']}')
+        f'{today.iloc[0]['description']}.')
 
 
 def get_weather(query, model=None):
@@ -81,8 +83,11 @@ def get_weather(query, model=None):
     res = get_word_list(query, days)
     f = None
 
+    with open(URLS['current_city'], 'r', encoding='utf') as f:
+        city = json.load(f)
+
     temp = morph.parse('градус')[0]
-    city = morph.parse('москва')[0]
+    city = morph.parse(city['name'])[0]
 
     if res:
         f = res[0]['name']
@@ -106,7 +111,12 @@ def get_weather(query, model=None):
         print(key)
         return speak_weather(city, temp, today, 'завтра')
 
-    # elif f == 'сейчас':
+    elif f == 'сейчас':
+        data_weather = pd.read_csv(URLS['weather_now'])
+        return (
+            f'сейчас в {city.inflect({'datv'}).word} {num2words(data_weather.iloc[0]['now_weather'], lang='ru')} {temp.make_agree_with_number(data_weather.iloc[0]['now_weather']).word}. '
+            f'ощущается как {num2words(data_weather.iloc[0]['now_feel'], lang='ru')} {temp.make_agree_with_number(data_weather.iloc[0]['now_feel']).word}. '
+            f'{data_weather.iloc[0]['now_desc']}.')
 
     else:
         days_of_week = ["понедельник", "вторник", "среда", "четверг", "пятница", "суббота", "воскресенье"]
@@ -147,14 +157,12 @@ def get_weather(query, model=None):
                         number += i
                 if number != '':
                     full_number = f'{number} {s_name}'
-                    number_month = data_weather[data_weather['date'] == full_number]
-                    print(number_month)
+                    weather = data_weather[data_weather['date'] == full_number]
+                    print(weather)
+                    month_p = morph.parse(month[0]['name'])[0]
 
-            # data_weather = pd.read_csv(URLS['weather_now'])
-        return (
-            f'сейчас в {city.inflect({'datv'}).word} {num2words(data_weather.iloc[0]['now_weather'], lang='ru')} {temp.make_agree_with_number(data_weather.iloc[0]['now_weather']).word}. '
-            f'ощущается как {num2words(data_weather.iloc[0]['now_feel'], lang='ru')} {temp.make_agree_with_number(data_weather.iloc[0]['now_feel']).word}. '
-            f'{data_weather.iloc[0]['now_desc']}')
-
-
-get_weather('какая погода двадцать первого апреля')
+                    print(weather.iloc[0]['temp_min'])
+                    return (
+                        f'в эту дату в {city.inflect({'datv'}).word} минимальная температура {num2words((weather.iloc[0]['temp_min']), lang='ru')} {temp.make_agree_with_number(weather.iloc[0]['temp_min']).word}. '
+                        f'Максимальная температура {num2words(weather.iloc[0]['temp_max'], lang='ru')} {temp.make_agree_with_number(weather.iloc[0]['temp_max']).word}. '
+                        f'{weather.iloc[0]['description']}.')
