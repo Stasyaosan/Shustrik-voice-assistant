@@ -7,11 +7,14 @@ import pandas as pd
 from num2words import num2words
 import pymorphy3
 from urls.config import URLS
+from words2numsrus import NumberExtractor
 
 load_dotenv()
 
 model_transformers = model_sentence_transformers
 morph = pymorphy3.MorphAnalyzer()
+
+extractor = NumberExtractor()
 
 
 def get_date_by_weekday(target_weekday):
@@ -74,7 +77,7 @@ def get_weather(query, model=None):
     locale.setlocale(locale.LC_TIME, 'russian')
     data_weather = pd.read_csv(URLS['weather_csv'])
 
-    days = ['сегодня', 'завтра']
+    days = ['сегодня', 'завтра', 'сейчас']
     res = get_word_list(query, days)
     f = None
 
@@ -103,6 +106,8 @@ def get_weather(query, model=None):
         print(key)
         return speak_weather(city, temp, today, 'завтра')
 
+    # elif f == 'сейчас':
+
     else:
         days_of_week = ["понедельник", "вторник", "среда", "четверг", "пятница", "суббота", "воскресенье"]
         res = get_word_list(query, days_of_week, model)
@@ -118,8 +123,38 @@ def get_weather(query, model=None):
                 day = 'субботу'
             return speak_weather(city, temp, today, day)
         else:
-            data_weather = pd.read_csv(URLS['weather_now'])
+            result = extractor.replace_groups(query)
+            months = {
+                "январь": "янв",
+                "февраль": "фев",
+                "март": "мар",
+                "апрель": "апр",
+                "май": "май",
+                "июнь": "июн",
+                "июль": "июл",
+                "август": "авг",
+                "сентябрь": "сен",
+                "октябрь": "окт",
+                "ноябрь": "ноя",
+                "декабрь": "дек"
+            }
+            month = get_word_list(query, list(months.keys()), model)
+            if month:
+                s_name = months[month[0]['name']]
+                number = ''
+                for i in result:
+                    if i.isdigit():
+                        number += i
+                if number != '':
+                    full_number = f'{number} {s_name}'
+                    number_month = data_weather[data_weather['date'] == full_number]
+                    print(number_month)
+
+            # data_weather = pd.read_csv(URLS['weather_now'])
         return (
-                f'сейчас в {city.inflect({'datv'}).word} {num2words(data_weather.iloc[0]['now_weather'], lang='ru')} {temp.make_agree_with_number(data_weather.iloc[0]['now_weather']).word}. '
-                f'ощущается как {num2words(data_weather.iloc[0]['now_feel'], lang='ru')} {temp.make_agree_with_number(data_weather.iloc[0]['now_feel']).word}. '
-                f'{data_weather.iloc[0]['now_desc']}')
+            f'сейчас в {city.inflect({'datv'}).word} {num2words(data_weather.iloc[0]['now_weather'], lang='ru')} {temp.make_agree_with_number(data_weather.iloc[0]['now_weather']).word}. '
+            f'ощущается как {num2words(data_weather.iloc[0]['now_feel'], lang='ru')} {temp.make_agree_with_number(data_weather.iloc[0]['now_feel']).word}. '
+            f'{data_weather.iloc[0]['now_desc']}')
+
+
+get_weather('какая погода двадцать первого апреля')
