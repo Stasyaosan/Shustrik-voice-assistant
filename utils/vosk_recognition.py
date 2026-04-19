@@ -23,8 +23,6 @@ def vosk_rec():
 
     stream.start_stream()
 
-    print(" Говорите... (Ctrl+C для выхода)")
-
     try:
         while True:
             data = stream.read(4000, exception_on_overflow=False)

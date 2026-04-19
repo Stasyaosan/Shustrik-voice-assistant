@@ -18,11 +18,17 @@ from commands.open_program import ProgramSearcher
 from commands.wikipedia_api import Wiki
 from commands.schedule_by_day import schedule_subject
 from commands.weather import get_weather
+from colorama import init, Fore, Back, Style
 
-audio_silero = Silero()
-qr = Query()
+init()
 
-load_dotenv()
+try:
+    audio_silero = Silero()
+    qr = Query()
+
+    load_dotenv()
+except:
+    pass
 
 
 class Voice:
@@ -40,7 +46,7 @@ class Voice:
         # self.calibrate_microphone()
 
     def speak(self, text):
-        print(f"[speak] {text}")
+        print(Fore.GREEN + Style.DIM + f"[speak] {text}" + Style.RESET_ALL)
         self.q.add(audio_silero.silero_tts_basic, text)
 
     def stop(self):
@@ -75,7 +81,7 @@ class Voice:
         if not command.startswith('барсик'):
             return
 
-        print(f"Команда: {command}")
+        print(Fore.YELLOW + Style.DIM + f"Команда: {command}" + Style.RESET_ALL)
 
         command = command.replace('барсик', '').strip()
 
@@ -128,19 +134,23 @@ class Voice:
         # self.speak("Ассистент запущен.")
 
         while True:
-            if self.is_listening:
-                command = self.listen()
-                if command and command.strip():
-                    self.process_command(command)
-                time.sleep(0.5)
-            else:
-                command = self.listen()
-                index = command.find('барсик')
-                if index != -1:
-                    command = command[index:]
-                    if command.lower() == 'барсик проснись':
-                        self.is_listening = True
-                        self.speak('Я проснулся')
+            try:
+                if self.is_listening:
+                    command = self.listen()
+                    if command and command.strip():
+                        self.process_command(command)
+                    time.sleep(0.5)
+                else:
+                    command = self.listen()
+                    index = command.find('барсик')
+                    if index != -1:
+                        command = command[index:]
+                        if command.lower() == 'барсик проснись':
+                            self.is_listening = True
+                            self.speak('Я проснулся')
+            except Exception as e:
+                print(print(Fore.RED + str(e) + Style.RESET_ALL))
+                continue
 
     def start_listening(self):
         if self.is_listening:
@@ -153,17 +163,13 @@ class Voice:
 
 
 if __name__ == "__main__":
+
     v = Voice()
+    v.start_listening()
+    print("Ассистент активен. Нажмите Ctrl+C для остановки.")
 
-    try:
-        v.start_listening()
-        print("Ассистент активен. Нажмите Ctrl+C для остановки.")
+    while v.is_listening:
+        time.sleep(1)
 
-        while v.is_listening:
-            time.sleep(1)
-
-    except KeyboardInterrupt:
-        print("\nОстановка пользователем")
-    finally:
-        v.stop()
-        print("Ассистент завершил работу")
+    v.stop()
+    print("Ассистент завершил работу")
