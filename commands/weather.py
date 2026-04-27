@@ -1,6 +1,5 @@
 import json
 
-from dotenv import load_dotenv
 from utils.models import model_sentence_transformers
 from sentence_transformers import util
 from datetime import datetime, timedelta
@@ -10,8 +9,6 @@ from num2words import num2words
 import pymorphy3
 from urls.config import URLS
 from words2numsrus import NumberExtractor
-
-load_dotenv()
 
 model_transformers = model_sentence_transformers
 morph = pymorphy3.MorphAnalyzer()
@@ -107,8 +104,6 @@ def get_weather(query, model=None):
         month_short = next_day.strftime("%b")
         key = f'{day_of_month} {month_short}'
         today = data_weather[data_weather['date'] == key]
-        print(data_weather['date'])
-        print(key)
         return speak_weather(city, temp, today, 'завтра')
 
     elif f == 'сейчас':
@@ -158,10 +153,7 @@ def get_weather(query, model=None):
                 if number != '':
                     full_number = f'{number} {s_name}'
                     weather = data_weather[data_weather['date'] == full_number]
-                    print(weather)
                     month_p = morph.parse(month[0]['name'])[0]
-
-                    print(weather.iloc[0]['temp_min'])
                     return (
                         f'в эту дату в {city.inflect({'datv'}).word} минимальная температура {num2words((weather.iloc[0]['temp_min']), lang='ru')} {temp.make_agree_with_number(weather.iloc[0]['temp_min']).word}. '
                         f'Максимальная температура {num2words(weather.iloc[0]['temp_max'], lang='ru')} {temp.make_agree_with_number(weather.iloc[0]['temp_max']).word}. '

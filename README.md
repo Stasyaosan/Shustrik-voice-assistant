@@ -12,4 +12,11 @@
 - silero (генерация речи)
 - vosk (распознавание речи)
 - pandas
+- pytorch
 
+## Установка
+- скачайте [python](https://www.python.org/) с официального сайта
+- запустите setup.py
+```bash
+python setup.py
+```

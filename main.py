@@ -16,7 +16,12 @@ from utils.Query_recognition import Query
 
 from commands.open_program import ProgramSearcher
 from commands.wikipedia_api import Wiki
-from commands.schedule_by_day import schedule_subject
+
+try:
+    from commands.schedule_by_day import schedule_subject
+except:
+    pass
+
 from commands.weather import get_weather
 from colorama import init, Fore, Back, Style
 
@@ -103,7 +108,10 @@ class Voice:
             self.speak(f"Сейчас {a_h} {a_m}")
 
         elif qr.get_intent(command) == 'schedule_by_day':
-            schedule_subject(command, self.speak)
+            try:
+                schedule_subject(command, self.speak)
+            except:
+                pass
 
         elif qr.get_intent(command) == 'weather':
             parser_weather()
@@ -134,23 +142,23 @@ class Voice:
         # self.speak("Ассистент запущен.")
 
         while True:
-            try:
-                if self.is_listening:
-                    command = self.listen()
-                    if command and command.strip():
-                        self.process_command(command)
-                    time.sleep(0.5)
-                else:
-                    command = self.listen()
-                    index = command.find('барсик')
-                    if index != -1:
-                        command = command[index:]
-                        if command.lower() == 'барсик проснись':
-                            self.is_listening = True
-                            self.speak('Я проснулся')
-            except Exception as e:
-                print(print(Fore.RED + str(e) + Style.RESET_ALL))
-                continue
+            # try:
+            if self.is_listening:
+                command = self.listen()
+                if command and command.strip():
+                    self.process_command(command)
+                time.sleep(0.5)
+            else:
+                command = self.listen()
+                index = command.find('барсик')
+                if index != -1:
+                    command = command[index:]
+                    if command.lower() == 'барсик проснись':
+                        self.is_listening = True
+                        self.speak('Я проснулся')
+            # except Exception as e:
+            #     print(print(Fore.RED + str(e) + Style.RESET_ALL))
+            #     continue
 
     def start_listening(self):
         if self.is_listening:

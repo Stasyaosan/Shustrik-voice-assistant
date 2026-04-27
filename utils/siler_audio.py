@@ -1,13 +1,25 @@
 import torch
 import sounddevice as sd
 from urls.config import URLS
+from dotenv import load_dotenv
+from os import getenv
+
+load_dotenv()
 
 
 class Silero:
     def __init__(self):
         self.device = torch.device('cpu')
-        model_path = URLS['silero_model']
-        self.model = torch.package.PackageImporter(model_path).load_pickle("tts_models", "model")
+        language = 'ru'
+        model_id = 'v3_1_ru'
+        if getenv('ONLINE_MODELS') == 'true':
+            self.model, example_text = torch.hub.load(repo_or_dir='snakers4/silero-models',
+                                                 model='silero_tts',
+                                                 language=language,
+                                                 speaker=model_id)
+        else:
+            model_path = URLS['silero_model']
+            self.model = torch.package.PackageImporter(model_path).load_pickle("tts_models", "model")
 
     def silero_tts_basic(self, text, speaker='aidar'):
         self.model.to(self.device)
