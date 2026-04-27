@@ -15,6 +15,10 @@ def get_python_path(venv='venv'):
         activate_script = os.path.join(venv, 'Scripts', 'activate')
         cmd = f'start cmd /k "{activate_script} && pip install -r requirements.txt && {python_cmd} main.py"'
         subprocess.run(cmd, shell=True)
+    else:
+        activate_script = os.path.join('source', venv, 'bin', 'activate')
+        cmd = f'{activate_script} && pip install -r requirements.txt && {python_cmd} main.py"'
+        subprocess.run(cmd, shell=True)
 
 
 get_python_path('venv')
