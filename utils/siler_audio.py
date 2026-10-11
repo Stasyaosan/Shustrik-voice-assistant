@@ -11,7 +11,7 @@ class Silero:
     def __init__(self):
         self.device = torch.device('cpu')
         language = 'ru'
-        model_id = 'v3_1_ru'
+        model_id = 'v4_ru'
         if getenv('ONLINE_MODELS') == 'true':
             self.model, example_text = torch.hub.load(repo_or_dir='snakers4/silero-models',
                                                  model='silero_tts',

@@ -2,8 +2,11 @@ import pyaudio
 import json
 from vosk import Model, KaldiRecognizer
 from urls.config import URLS
+import os
 
-model = Model(URLS['vosk_model'])
+vosk_model_path = URLS['vosk_model']
+
+model = Model(str(vosk_model_path))
 
 recognizer = KaldiRecognizer(model, 16000)
 

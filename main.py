@@ -14,13 +14,12 @@ from utils.models import model_sentence_transformers
 from utils.siler_audio import Silero
 from utils.Query_recognition import Query
 
-from commands.open_program import ProgramSearcher
+# from commands.open_program import ProgramSearcher
 from commands.wikipedia_api import Wiki
 
-try:
-    from commands.schedule_by_day import schedule_subject
-except:
-    pass
+
+# from commands.schedule_by_day import schedule_subject
+
 
 from commands.weather import get_weather
 from colorama import init, Fore, Back, Style
@@ -40,7 +39,7 @@ class Voice:
     def __init__(self):
         self.model_transformers = model_sentence_transformers
         self.is_listening = False
-        self.ps = ProgramSearcher()
+        # self.ps = ProgramSearcher()
         self.wiki = Wiki()
         self.q = SpeakThread()
         self.q.start()
@@ -107,11 +106,11 @@ class Voice:
             a_m = num2words(m, lang='ru')
             self.speak(f"Сейчас {a_h} {a_m}")
 
-        elif qr.get_intent(command) == 'schedule_by_day':
-            try:
-                schedule_subject(command, self.speak)
-            except:
-                pass
+        # elif qr.get_intent(command) == 'schedule_by_day':
+        #     try:
+        #         # schedule_subject(command, self.speak)
+        #     except:
+        #         pass
 
         elif qr.get_intent(command) == 'weather':
             parser_weather()
