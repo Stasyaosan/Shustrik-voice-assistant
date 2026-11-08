@@ -13,9 +13,11 @@ from utils.vosk_recognition import vosk_rec
 from utils.models import model_sentence_transformers
 from utils.siler_audio import Silero
 from utils.Query_recognition import Query
+from utils.text_api import text_post
 
-# from commands.open_program import ProgramSearcher
+
 from commands.wikipedia_api import Wiki
+from commands.open_link import LinkSearcher
 
 
 # from commands.schedule_by_day import schedule_subject
@@ -34,7 +36,6 @@ try:
 except:
     pass
 
-
 class Voice:
     def __init__(self):
         self.model_transformers = model_sentence_transformers
@@ -51,6 +52,7 @@ class Voice:
 
     def speak(self, text):
         print(Fore.GREEN + Style.DIM + f"[speak] {text}" + Style.RESET_ALL)
+        text_post(text, "left")
         self.q.add(audio_silero.silero_tts_basic, text)
 
     def stop(self):
@@ -86,6 +88,7 @@ class Voice:
             return
 
         print(Fore.YELLOW + Style.DIM + f"Команда: {command}" + Style.RESET_ALL)
+        text_post(command, "right")
 
         command = command.replace('барсик', '').strip()
 
@@ -93,48 +96,52 @@ class Voice:
         for intent in self.intents_keys:
             args = self.delete_commands(command, intent)
 
-        if qr.get_intent(command):
-            self.q.clear()
+        try:
+            if qr.get_intent(command):
+                self.q.clear()
 
-        if qr.get_intent(command) == 'greeting':
-            self.speak("Привет! Рад вас слышать!")
+            if qr.get_intent(command) == 'greeting':
+                self.speak("Привет! Рад вас слышать!")
 
-        elif qr.get_intent(command) == 'time':
-            h = datetime.now().strftime("%H")
-            m = datetime.now().strftime("%M")
-            a_h = num2words(h, lang='ru')
-            a_m = num2words(m, lang='ru')
-            self.speak(f"Сейчас {a_h} {a_m}")
+            elif qr.get_intent(command) == 'time':
+                h = datetime.now().strftime("%H")
+                m = datetime.now().strftime("%M")
+                a_h = num2words(h, lang='ru')
+                a_m = num2words(m, lang='ru')
+                self.speak(f"Сейчас {a_h} {a_m}")
 
-        # elif qr.get_intent(command) == 'schedule_by_day':
-        #     try:
-        #         # schedule_subject(command, self.speak)
-        #     except:
-        #         pass
+            # elif qr.get_intent(command) == 'schedule_by_day':
+            #     try:
+            #         # schedule_subject(command, self.speak)
+            #     except:
+            #         pass
 
-        elif qr.get_intent(command) == 'weather':
-            parser_weather()
-            self.speak(get_weather(command, self.model_transformers))
+            elif qr.get_intent(command) == 'weather':
+                parser_weather()
+                self.speak(get_weather(command, self.model_transformers))
 
-        elif qr.get_intent(command) == 'farewell':
-            self.speak("До свидания! Я заснул.")
-            self.is_listening = False
+            elif qr.get_intent(command) == 'farewell':
+                self.speak("До свидания! Я заснул.")
+                self.is_listening = False
 
-        elif qr.get_intent(command) == 'open_program':
-            print(args)
-            self.speak(self.ps.search_s(args))
+            elif qr.get_intent(command) == 'open_link':
+                searcher = LinkSearcher()
+                result = searcher.search_l(command)
 
-        elif qr.get_intent(command) == 'wikipedia_search':
-            self.speak(self.wiki.search(args)['content'])
+                self.speak(f"Результат выполнения: {result}")
 
-        elif qr.get_intent(command) == 'change_city':
-            city = change_city(command)
-            print(command)
-            print(city)
-            self.speak(f'Город изменён на {city}')
+            elif qr.get_intent(command) == 'wikipedia_search':
+                self.speak(self.wiki.search(args)['content'])
 
-        else:
-            self.speak("Пока не понимаю эту команду.")
+            elif qr.get_intent(command) == 'change_city':
+                city = change_city(command)
+                print(command)
+                print(city)
+                self.speak(f'Город изменён на {city}')
+            else:
+                self.speak("Пока не понимаю эту команду.")
+        except Exception as e:
+            print(e)
 
     def listening_loop(self):
         print("Цикл прослушивания запущен")

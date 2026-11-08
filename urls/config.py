@@ -13,5 +13,6 @@ URLS = {
     'vosk_model': project_path / 'utils' / 'models' / 'vosk-model-small-ru-0.22',
     'models': project_path / 'utils' / 'models',
     'transformers_model': project_path / 'utils' / 'models' / 'paraphrase-multilingual-MiniLM-L12-v2',
-    'silero_model': project_path / 'utils' / 'models' / 'silero' / 'v4_ru.pt'
+    'silero_model': project_path / 'utils' / 'models' / 'silero' / 'v4_ru.pt',
+    'user_links': project_path / 'user_data' / 'user_links.json'
 }

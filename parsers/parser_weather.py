@@ -7,6 +7,54 @@ import os
 from urls.config import URLS
 
 
+def _parse_month_items(soup):
+    """Парсит месячный прогноз из div.widget-month .widget-body."""
+    widget = soup.find('div', class_='widget-month')
+    if not widget:
+        return []
+
+    body = widget.find('div', class_='widget-body')
+    if not body:
+        return []
+
+    items = body.find_all(['div', 'a'], class_='row-item-month-date')
+    result = []
+
+    for item in items:
+        date_el = item.find('div', class_='date')
+        if not date_el:
+            continue
+        date_text = date_el.get_text(strip=True)  # "26 окт" или "27"
+
+        temp_el = item.find('div', class_='temp')
+        maxt = 'N/A'
+        mint = 'N/A'
+
+        if temp_el:
+            max_el = temp_el.find('div', class_='maxt')
+            if max_el:
+                tv = max_el.find('temperature-value')
+                if tv and tv.get('value') is not None:
+                    maxt = tv['value']
+
+            min_el = temp_el.find('div', class_='mint')
+            if min_el:
+                tv = min_el.find('temperature-value')
+                if tv and tv.get('value') is not None:
+                    mint = tv['value']
+
+        description = item.get('data-tooltip', '')
+
+        result.append({
+            'date': date_text,
+            'temp_max': maxt,
+            'temp_min': mint,
+            'description': description,
+        })
+
+    return result
+
+
 def parser_weather():
     if not os.path.exists(URLS['current_city']):
         get_weather_link()
@@ -18,98 +66,70 @@ def parser_weather():
     now_url = f'{link}/now/'
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Accept': 'text/html'
+        'Accept': 'text/html',
     }
 
+    # ---- Месячный прогноз ----
     try:
         response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
         text = response.text
         with open(URLS['weather_txt'], 'w', encoding='utf-8') as f:
             f.write(text)
-    except:
+    except Exception:
         with open(URLS['weather_txt'], 'r', encoding='utf-8') as f:
             text = f.read()
 
+    soup = BeautifulSoup(text, 'html.parser')
+    weather_data = _parse_month_items(soup)
+
+    if weather_data:
+        df = pd.DataFrame(weather_data)
+        df.to_csv(URLS['weather_csv'], index=False, encoding='utf-8')
+    else:
+        # не перезаписываем CSV пустым файлом
+        print('Месячный прогноз не найден — CSV не обновлён')
+
+    # ---- Погода сейчас ----
     try:
         response_now = requests.get(now_url, headers=headers, timeout=10)
         response_now.raise_for_status()
         text_now = response_now.text
-        with open(URLS['weather_txt'], 'w', encoding='utf-8') as f:
-            f.write(text)
-    except:
+    except Exception:
         with open(URLS['weather_txt'], 'r', encoding='utf-8') as f:
             text_now = f.read()
 
-    soup = BeautifulSoup(text, 'html.parser')
-    weather_items = soup.find_all(['div', 'a'], 'row-item-month-date')
-    if not weather_items:
-        print('Элементы не найдены')
-    else:
-        q = ''
-        weather_data = []
-        for i in weather_items:
-            date_elem = i.find('div', class_='date')
-            date = date_elem.text.strip()
-            temp_elem = i.find('div', class_='temp')
-
-            if not date.isdigit():
-                q = ''
-                for char in date:
-                    if not char.isdigit() and not char == ' ':
-                        q += char
-
-            description = i.get('data-tooltip', '')
-
-            if temp_elem:
-
-                max_elem = temp_elem.find('div', class_='maxt')
-                if max_elem:
-                    temp_elem_temp_maxt = max_elem.find('temperature-value')
-                    if temp_elem_temp_maxt:
-                        maxt = temp_elem_temp_maxt.get('value')
-                mix_elem = temp_elem.find('div', class_='mint')
-                if mix_elem:
-                    temp_elem_temp_mint = mix_elem.find('temperature-value')
-                    if temp_elem_temp_mint:
-                        mint = temp_elem_temp_mint.get('value')
-            else:
-                maxt = 'N/A'
-                mint = 'N/A'
-
-            if q != '':
-                date = date.replace(q, '').strip()
-                weather_data.append({
-                    'date': f'{date} {q}',
-                    'temp_max': maxt,
-                    'temp_min': mint,
-                    'description': description
-                })
-        df = pd.DataFrame(weather_data)
-        df.to_csv(URLS['weather_csv'])
-
     soup_now = BeautifulSoup(text_now, 'html.parser')
-    now_weather = soup_now.find('div', class_='now-weather').find('temperature-value').get('value', '')
-    now_feel = soup_now.find('div', class_='now-feel').find('temperature-value').get('value', '')
-    now_desc = soup_now.find('div', class_='now-desc').text.strip()
-    now_localdate = soup_now.find('div', class_='now-localdate').text
 
-    now_ps = soup_now.find_all('div', class_='now-info-item')
+    now_weather_el = soup_now.find('div', class_='now-weather')
+    now_feel_el = soup_now.find('div', class_='now-feel')
+    now_desc_el = soup_now.find('div', class_='now-desc')
+    now_localdate_el = soup_now.find('div', class_='now-localdate')
+
+    now_weather = now_weather_el.find('temperature-value').get('value', '') if now_weather_el else ''
+    now_feel = now_feel_el.find('temperature-value').get('value', '') if now_feel_el else ''
+    now_desc = now_desc_el.get_text(strip=True) if now_desc_el else ''
+    now_localdate = now_localdate_el.get_text(strip=True) if now_localdate_el else ''
+
     now_hum = ''
-    for i in now_ps:
-        title = i.find('div', class_='item-title').text.strip()
-        if title == 'Влажность':
-            info = i.find('div', class_='item-information').find('div', class_='item-value').text
-            now_hum = info
+    for item in soup_now.find_all('div', class_='now-info-item'):
+        title_el = item.find('div', class_='item-title')
+        if title_el and title_el.get_text(strip=True) == 'Влажность':
+            value_el = item.find('div', class_='item-information')
+            if value_el:
+                inner = value_el.find('div', class_='item-value')
+                now_hum = inner.get_text(strip=True) if inner else value_el.get_text(strip=True)
             break
 
-    weather_data_now = [{
-        'datetime': now_localdate.strip(),
-        'now_weather': now_weather.strip(),
-        'now_feel': now_feel.strip(),
-        'now_desc': now_desc.strip(),
-        'now_hum': now_hum.strip()
-    }]
+    df_now = pd.DataFrame([{
+        'datetime': now_localdate,
+        'now_weather': now_weather,
+        'now_feel': now_feel,
+        'now_desc': now_desc,
+        'now_hum': now_hum,
+    }])
+    df_now.to_csv(URLS['weather_now'], index=False, encoding='utf-8')
 
-    df = pd.DataFrame(weather_data_now)
-    df.to_csv(URLS['weather_now'])
+
+if __name__ == '__main__':
+    parser_weather()
