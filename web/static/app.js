@@ -139,24 +139,6 @@ function removeLin(index) {
     method: "POST",
     body: formData,
   })
-    .then((response) => {
-      if (response.ok) {
-        const btn = document.querySelector(
-          `button[onclick="removeLin(${index})"]`,
-        );
-        if (btn) {
-          const details = btn.closest("details");
-          if (details) details.remove();
-        }
-        reindexRemoveButtons();
-      }
-    })
-    .then((data) => {
-      console.log("Успешно отправлено:", data);
-    })
-    .catch((error) => {
-      console.error("Ошибка:", error);
-    });
 }
 
 function removeUrl(index, url) {
@@ -168,34 +150,6 @@ function removeUrl(index, url) {
     method: "POST",
     body: formData,
   })
-    .then((response) => {
-      if (response.ok) {
-        const buttons = container_link.querySelectorAll(
-          `button[onclick^="removeUrl(${index},"]`,
-        );
-        buttons.forEach((btn) => {
-          const match = btn
-            .getAttribute("onclick")
-            .match(/removeUrl\(\d+,\s*'((?:\\'|[^'])*)'\)/);
-          if (match) {
-            const btnUrl = match[1].replace(/\\'/g, "'");
-            if (btnUrl === url) {
-              const row = btn.closest(".d-flex");
-              if (row) row.remove();
-            }
-          }
-        });
-
-        // Если у группы не осталось ни одной ссылки — перерисовать через WS
-        reindexRemoveButtons();
-      }
-    })
-    .then((data) => {
-      console.log("Успешно отправлено:", data);
-    })
-    .catch((error) => {
-      console.error("Ошибка:", error);
-    });
 }
 
 function reindexRemoveButtons() {

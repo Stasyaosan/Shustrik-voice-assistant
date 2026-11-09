@@ -119,6 +119,7 @@ def remove_link():
 @app.route('/api/remove_url', methods=['POST'])
 def remove_url():
     index = request.form.get('index')
+    print(index)
     url = request.form.get('url')
     data = load_data()
     try:
@@ -131,10 +132,7 @@ def remove_url():
             return jsonify({"error": "ссылка не найдена"}), 404
 
         urls.remove(url)
-        if not urls:
-            data.pop(idx)
-        else:
-            item['link'] = urls
+        item['link'] = urls
 
         save_data(data)
         broadcast(json.dumps(data, ensure_ascii=False))
