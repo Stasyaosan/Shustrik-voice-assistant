@@ -10,3 +10,4 @@ weather_data.csv
 weather_data_now.csv
 geopos.py
 user_data/current_city.json
+user_data/user_links.json

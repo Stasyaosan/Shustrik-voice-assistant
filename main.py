@@ -1,4 +1,5 @@
 import json
+import os
 import time
 from datetime import datetime
 import pymorphy3
@@ -65,7 +66,8 @@ class Voice:
             return text.lower()
 
         except Exception as e:
-            print(f"Ошибка слушания: {e}")
+            if os.getenv('ONLINE_MODELS') == 'false':
+                print(f"Ошибка слушания: {e}")
             return ""
 
     def delete_commands(self, command, indent):
@@ -145,7 +147,7 @@ class Voice:
 
     def listening_loop(self):
         print("Цикл прослушивания запущен")
-        # self.speak("Ассистент запущен.")
+        self.speak("Ассистент запущен.")
 
         while True:
             # try:
